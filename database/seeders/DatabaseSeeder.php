@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             TarifKecamatanSeeder::class,
             WilayahSeeder::class,
+            TherapistSeeder::class,
         ]);
     }
 }

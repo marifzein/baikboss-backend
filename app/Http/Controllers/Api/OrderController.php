@@ -35,6 +35,19 @@ class OrderController extends Controller
         ], 201);
     }
 
+    /** GET /api/my-orders — semua pesanan pindahan milik user login */
+    public function myOrders(Request $request): JsonResponse
+    {
+        $orders = Order::with(['items', 'payment'])
+            ->where('user_id', $request->user()->id)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return response()->json([
+            'data' => $orders->map(fn ($order) => $this->present($order)),
+        ]);
+    }
+
     /** GET /api/orders/{code}?wa=628xxx — cek status pesanan */
     public function show(string $code, Request $request): JsonResponse
     {
@@ -107,6 +120,7 @@ class OrderController extends Controller
     private function present(Order $order): array
     {
         return [
+            'id' => $order->id,
             'order_code' => $order->order_code,
             'name' => $order->user->name,
             'wa_number' => $order->wa_number,
@@ -144,6 +158,7 @@ class OrderController extends Controller
                 'paid_at' => $order->payment->paid_at?->toIso8601String(),
             ] : null,
             'wa_tim' => config('baikboss.wa_tim'),
+            'wa_bossmove' => config('baikboss.wa_bossmove'),
             'rekening' => config('baikboss.rekening'),
             'created_at' => $order->created_at->toIso8601String(),
         ];
